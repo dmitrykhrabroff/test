@@ -14,3 +14,16 @@ stages:
     - path: data/interim/interim_df.csv
       md5: e2f42b44b42bb945d2338256c8cf827c
       size: 2514032208
+  clean_data:
+    cmd: python src/data/clean_data.py data/interim/interim_df.csv data/processed/new.csv
+    deps:
+    - path: data/interim/interim_df.csv
+      md5: e2f42b44b42bb945d2338256c8cf827c
+      size: 2514032208
+    - path: src/data/clean_data.py
+      md5: 04183f3d03750d29f23d077b3d4766f1
+      size: 1217
+    outs:
+    - path: data/processed/new.csv
+      md5: 32311b005f68c8b3fb556f2d0868f95a
+      size: 1604320629

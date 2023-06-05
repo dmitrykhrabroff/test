@@ -4,6 +4,8 @@ from torch.utils.data import Dataset, DataLoader
 from transformers import BertTokenizerFast as BertTokenizer
 import pandas as pd
 
+from src.data.config import ConfigData
+
 
 class MultiLabelDataset(Dataset):
   def __init__(
@@ -15,16 +17,17 @@ class MultiLabelDataset(Dataset):
     self.tokenizer = tokenizer
     self.data = data
     self.max_token_len = max_token_len
+    self.labels = ConfigData().labels
 
   def __len__(self):
     return len(self.data)
   
   def __getitem__(self, index: int):
     data_row = self.data.iloc[index]
-    comment_text = data_row.comment_text
-    labels = data_row[LABEL_COLUMNS]
+    text = data_row.summary
+    labels = data_row[self.labels]
     encoding = self.tokenizer.encode_plus(
-      comment_text,
+      text,
       add_special_tokens=True,
       max_length=self.max_token_len,
       return_token_type_ids=False,
@@ -34,7 +37,7 @@ class MultiLabelDataset(Dataset):
       return_tensors='pt',
     )
     return dict(
-      comment_text=comment_text,
+      comment_text=text,
       input_ids=encoding["input_ids"].flatten(),
       attention_mask=encoding["attention_mask"].flatten(),
       labels=torch.FloatTensor(labels)
