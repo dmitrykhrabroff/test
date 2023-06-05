@@ -1,0 +1,17 @@
+stages:
+  prepare_data:
+    cmd: python src/data/parse_data.py data/raw data/interim/interim_df.csv
+    deps:
+      - data/raw
+      - src/data/parse_data.py
+    outs:
+      - data/interim/interim_df.csv
+
+  clean_data:
+    cmd: python src/data/clean_data.py data/interim/interim_df.csv data/processed/new.csv
+    deps:
+      - data/interim/interim_df.csv
+      - src/data/clean_data.py
+    outs:
+      - data/processed/new.csv
+

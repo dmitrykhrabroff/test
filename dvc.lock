@@ -1,0 +1,16 @@
+schema: '2.0'
+stages:
+  prepare_data:
+    cmd: python src/data/parse_data.py data/raw data/interim/interim_df.csv
+    deps:
+    - path: data/raw
+      md5: 3cee025490f35e159b8843e8d05466f9.dir
+      size: 2505414925
+      nfiles: 21
+    - path: src/data/parse_data.py
+      md5: b8360888aed1ab97460ef07a6259327c
+      size: 848
+    outs:
+    - path: data/interim/interim_df.csv
+      md5: e2f42b44b42bb945d2338256c8cf827c
+      size: 2514032208

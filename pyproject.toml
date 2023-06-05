@@ -9,6 +9,11 @@ packages = [{include = "kaspersky_test"}]
 [tool.poetry.dependencies]
 python = "^3.10"
 dvc = "^2.58.2"
+dvc-s3 = "^2.22.0"
+pandas = "^2.0.2"
+torch = "^2.0.1"
+pytorch-lightning = "^2.0.2"
+torchvision = "^0.15.2"
 
 
 [build-system]

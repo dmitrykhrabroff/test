@@ -78,6 +78,7 @@ target/
 # exclude data from source control by default
 /data/interim
 /data/processed
+/notebook/clean_data.csv
 
 # Mac OS-specific storage files
 .DS_Store
@@ -88,3 +89,4 @@ target/
 
 # Mypy cache
 .mypy_cache/
+notebooks/clean_data.csv
