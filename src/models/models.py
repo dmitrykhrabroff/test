@@ -3,9 +3,14 @@ import torch
 import torch.nn as nn
 from transformers import BertModel, AdamW, get_linear_schedule_with_warmup
 from torchmetrics import AUROC
+from torchmetrics import AUROC
 
 from src.models.config import ConfigModel
+from src.models.config import ConfigModel
 
+class TransformersTextClassifier(pl.LightningModule):
+  def __init__(self, model_name = 'bert-base-cased', lr_rate = 2e-5, 
+               n_training_steps = None, n_warmup_steps = None):
 class TransformersTextClassifier(pl.LightningModule):
   def __init__(self, model_name = 'bert-base-cased', lr_rate = 2e-5, 
                n_training_steps = None, n_warmup_steps = None):
@@ -74,6 +79,7 @@ class TransformersTextClassifier(pl.LightningModule):
     self.on_shared_epoch_end('train')
 
   def configure_optimizers(self):
+    optimizer = AdamW(self.parameters(), lr=self.lr_rate)
     optimizer = AdamW(self.parameters(), lr=self.lr_rate)
     scheduler = get_linear_schedule_with_warmup(
       optimizer,
