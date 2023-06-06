@@ -1,10 +1,7 @@
 import torch
-import torch.nn as nn
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 from transformers import BertTokenizerFast as BertTokenizer
 import pandas as pd
-
-from src.data.config import ConfigData
 
 
 class MultiLabelDataset(Dataset):
@@ -17,7 +14,6 @@ class MultiLabelDataset(Dataset):
     self.tokenizer = tokenizer
     self.data = data
     self.max_token_len = max_token_len
-    self.labels = ConfigData().labels
 
   def __len__(self):
     return len(self.data)
@@ -25,7 +21,8 @@ class MultiLabelDataset(Dataset):
   def __getitem__(self, index: int):
     data_row = self.data.iloc[index]
     text = data_row.summary
-    labels = data_row[self.labels]
+    labels = data_row.iloc[1:]
+    print(labels)
     encoding = self.tokenizer.encode_plus(
       text,
       add_special_tokens=True,

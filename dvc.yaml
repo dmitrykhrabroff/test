@@ -1,17 +1,19 @@
 stages:
   prepare_data:
-    cmd: python src/data/parse_data.py data/raw data/interim/interim_df.csv
+    cmd: python src/data/prepare_data.py data/raw data/interim/interim_df.csv
     deps:
       - data/raw
-      - src/data/parse_data.py
+      - src/data/prepare_data.py
     outs:
       - data/interim/interim_df.csv
 
-  clean_data:
-    cmd: python src/data/clean_data.py data/interim/interim_df.csv data/processed/new.csv
+  make_dataset:
+    cmd: python src/data/make_dataset.py data/interim/interim_df.csv data/processed/dataset.pkl
     deps:
       - data/interim/interim_df.csv
-      - src/data/clean_data.py
+      - src/data/make_dataset.py
     outs:
-      - data/processed/new.csv
+      - data/processed/dataset.pkl
+
+
 

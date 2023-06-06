@@ -1,19 +1,19 @@
 schema: '2.0'
 stages:
   prepare_data:
-    cmd: python src/data/parse_data.py data/raw data/interim/interim_df.csv
+    cmd: python src/data/prepare_data.py data/raw data/interim/interim_df.csv
     deps:
     - path: data/raw
       md5: 3cee025490f35e159b8843e8d05466f9.dir
       size: 2505414925
       nfiles: 21
-    - path: src/data/parse_data.py
-      md5: b8360888aed1ab97460ef07a6259327c
-      size: 848
+    - path: src/data/prepare_data.py
+      md5: a7ac1f0952a159b4175404560a16c83e
+      size: 1978
     outs:
     - path: data/interim/interim_df.csv
-      md5: e2f42b44b42bb945d2338256c8cf827c
-      size: 2514032208
+      md5: ce1a031a159a05a649456939a2a02c27
+      size: 1525681841
   clean_data:
     cmd: python src/data/clean_data.py data/interim/interim_df.csv data/processed/new.csv
     deps:
@@ -27,3 +27,16 @@ stages:
     - path: data/processed/new.csv
       md5: 32311b005f68c8b3fb556f2d0868f95a
       size: 1604320629
+  make_dataset:
+    cmd: python src/data/make_dataset.py data/interim/interim_df.csv data/processed/dataset.pkl
+    deps:
+    - path: data/interim/interim_df.csv
+      md5: ce1a031a159a05a649456939a2a02c27
+      size: 1525681841
+    - path: src/data/make_dataset.py
+      md5: 97f5b33755356812f3db76492b805244
+      size: 1345
+    outs:
+    - path: data/processed/dataset.pkl
+      md5: 7bb2a3f54ffb2490f63e063dc542b6e1
+      size: 1548644975
