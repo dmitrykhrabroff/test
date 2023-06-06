@@ -1,5 +1,3 @@
-
-
 class ConfigData:
     pass
     

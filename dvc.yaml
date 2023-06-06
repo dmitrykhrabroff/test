@@ -8,12 +8,12 @@ stages:
       - data/interim/interim_df.csv
 
   make_dataset:
-    cmd: python src/data/make_dataset.py data/interim/interim_df.csv data/processed/dataset.pkl
+    cmd: python src/data/make_dataset.py data/interim/interim_df.csv data/processed/processed_df.csv
     deps:
       - data/interim/interim_df.csv
       - src/data/make_dataset.py
     outs:
-      - data/processed/dataset.pkl
+      - data/processed/processed_df.csv
 
 
 
