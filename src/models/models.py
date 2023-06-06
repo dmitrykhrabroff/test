@@ -2,19 +2,23 @@ import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 from transformers import BertModel, AdamW, get_linear_schedule_with_warmup
-from pytorch_lightning.metrics.functional import auroc
+from torchmetrics import AUROC
 
-from config import ConfigModel
+from src.models.config import ConfigModel
 
-class ToxicCommentTagger(pl.LightningModule):
-  def __init__(self, n_classes: int, model_name = 'bert-base-cased'):
+class TransformersTextClassifier(pl.LightningModule):
+  def __init__(self, model_name = 'bert-base-cased', lr_rate = 2e-5, 
+               n_training_steps = None, n_warmup_steps = None):
     super().__init__()
     config = ConfigModel()
     self.bert = BertModel.from_pretrained(model_name, return_dict=True)
-    self.classifier = nn.Linear(self.bert.config.hidden_size, n_classes)
-    self.n_training_steps = config.n_training_steps
-    self.n_warmup_steps = config.n_warmup_steps
+    self.classifier = nn.Linear(self.bert.config.hidden_size, self.config.n_classes)
+    self.n_training_steps = n_training_steps
+    self.n_warmup_steps = n_warmup_steps
     self.criterion = config.loss_fn
+    self.lr_rate = lr_rate
+    self.metrcis = AUROC(task = 'multilabel', num_labels = config.n_classes)
+    self.label_names = config.label_names
 
   def forward(self, input_ids, attention_mask, labels=None):
     output = self.bert(input_ids, attention_mask=attention_mask)
@@ -59,12 +63,12 @@ class ToxicCommentTagger(pl.LightningModule):
         predictions.append(out_predictions)
     labels = torch.stack(labels).int()
     predictions = torch.stack(predictions)
-    for i, name in enumerate(LABEL_COLUMNS):
-      class_roc_auc = auroc(predictions[:, i], labels[:, i])
+    for i, name in enumerate(self.label_names):
+      class_roc_auc = self.metrcis(predictions[:, i], labels[:, i])
       self.logger.experiment.add_scalar(f"{name}_roc_auc/Train", class_roc_auc, self.current_epoch)
-      
+
   def configure_optimizers(self):
-    optimizer = AdamW(self.parameters(), lr=2e-5)
+    optimizer = AdamW(self.parameters(), lr=self.lr_rate)
     scheduler = get_linear_schedule_with_warmup(
       optimizer,
       num_warmup_steps=self.n_warmup_steps,

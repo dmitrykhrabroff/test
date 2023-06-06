@@ -14,6 +14,7 @@ class MultiLabelDataset(Dataset):
     self.tokenizer = tokenizer
     self.data = data
     self.labels = data.iloc[:, 1:]
+    self.labels_name = data.iloc[:, 1:].columns.to_list()
     self.max_token_len = max_token_len
 
   def __len__(self):

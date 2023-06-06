@@ -7,18 +7,19 @@ from transformers import BertTokenizerFast as BertTokenizer
 import pandas as pd
 
 
-from src.models import ConfigModel
+from src.models.config import ConfigModel
 from src.models.utils import MultiLabelDataset
 
 
 class MyDataModule(pl.LightningDataModule):
-    def __init__(self, input_filepath, model_name):
+    def __init__(self, input_filepath, model_name, batch_size):
         super().__init__()
         processed_df = pd.read_csv(input_filepath)
         tokenizer = BertTokenizer.from_pretrained(model_name)
-        self.dset = MultiLabelDataset(interim_df, tokenizer)
+        self.dset = MultiLabelDataset(processed_df, tokenizer)
+        
         self.config = ConfigModel()
-        self.batch_size = self.config.batch_size
+        self.batch_size = batch_size
         self.prepare_data()
 
     def prepare_data(self):
