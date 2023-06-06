@@ -28,16 +28,23 @@ def _clean_data(full_df: pd.DataFrame):
     clean_df.drop_duplicates(['summary', 'label'], inplace = True)
     le = LabelEncoder()
     clean_df.loc[:, 'text_id'] = le.fit_transform(clean_df.summary) # Unique id for unique text
-    mask = clean_df.duplicated('text_id', keep = False)
-    target_df = pd.get_dummies(clean_df.label).astype('int8') # label to OneHot vector
-    labels = target_df.columns.to_list()
-    clean_df = pd.concat([clean_df, target_df], axis = 1)
-    duplicated_df = clean_df.loc[mask, :]
-    duplicate_target = duplicated_df.groupby('text_id')[labels].sum()
-    clean_df.loc[mask, labels] = duplicate_target
+    clean_df = pd.get_dummies(clean_df, columns = ['label'], prefix='encodded_label') # label to OneHot vector
+    labels = [col for col in clean_df.columns if 'encodded_label' in col]
+    non_labels = [col for col in clean_df.columns if 'encodded_label' not in col]
+    target_df = clean_df.groupby('text_id')[labels].sum().reset_index()
+    clean_df = clean_df.loc[:, non_labels].merge(target_df, on='text_id')
     clean_df.drop_duplicates('text_id', inplace = True)
-    clean_df = clean_df.loc[:, ['summary'] + labels]
     return clean_df
+    # clean_df = pd.concat([clean_df, target_df], axis = 1)
+    # target_df = target_df.groupby('text_id').sum()
+    # duplicated_df = clean_df.loc[mask, :]
+    # duplicate_target = duplicated_df.groupby('text_id')[labels].sum()
+    # duplicated_df.drop_duplicates('text_id', inplace = True)
+    # duplicated_df = duplicated_df.drop(labels, axis =1)
+    # clean_df.loc[mask, labels] = clean_df.loc[mask, 'text_id'].map(duplicate_target)
+    # clean_df.drop_duplicates('text_id', inplace = True)
+    # clean_df = clean_df.loc[:, ['summary'] + labels]
+    # return clean_df
 
 
 

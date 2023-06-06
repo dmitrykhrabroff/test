@@ -13,7 +13,8 @@ class MultiLabelDataset(Dataset):
   ):
     self.tokenizer = tokenizer
     self.data = data
-    self.labels = data.iloc[:, 1:]
+    self.labels_name = [col for col in data.columns if 'encodded_label' in col]
+    self.labels = data.loc[:, self.labels_name]
     self.max_token_len = max_token_len
 
   def __len__(self):
@@ -22,8 +23,8 @@ class MultiLabelDataset(Dataset):
   def __getitem__(self, index: int):
     data_row = self.data.iloc[index]
     text = data_row.summary
-    labels = data_row.iloc[1:]
-    print(labels)
+    labels = data_row[self.labels_name]
+    # print(labels)
     encoding = self.tokenizer.encode_plus(
       text,
       add_special_tokens=True,

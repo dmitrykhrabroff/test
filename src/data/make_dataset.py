@@ -15,7 +15,7 @@ def main(input_filepath, output_filepath):
         cleaned data ready to be analyzed (saved in ../processed).
     """
     interim_df = pd.read_csv(input_filepath)
-    interim_df.to_csv(output_filepath)
+    interim_df.to_csv(output_filepath, index = False)
     logger = logging.getLogger(__name__)
     logger.info('making final data set from raw data')
 
