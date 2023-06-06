@@ -14,7 +14,7 @@ from src.models.utils import MultiLabelDataset
 class MyDataModule(pl.LightningDataModule):
     def __init__(self, input_filepath, model_name):
         super().__init__()
-        interim_df = pd.read_csv(input_filepath)
+        processed_df = pd.read_csv(input_filepath)
         tokenizer = BertTokenizer.from_pretrained(model_name)
         self.dset = MultiLabelDataset(interim_df, tokenizer)
         self.config = ConfigModel()
