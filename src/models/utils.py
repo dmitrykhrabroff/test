@@ -13,8 +13,9 @@ class MultiLabelDataset(Dataset):
   ):
     self.tokenizer = tokenizer
     self.data = data
+    self.size_data = data.shape
     self.labels_name = [col for col in data.columns if 'encodded_label' in col]
-    self.labels = data.loc[:, self.labels_name]
+    # self.labels = data.loc[:, self.labels_name]
     self.max_token_len = max_token_len
 
   def __len__(self):
@@ -36,8 +37,8 @@ class MultiLabelDataset(Dataset):
       return_tensors='pt',
     )
     return dict(
-      comment_text=text,
+      # comment_text=text,
       input_ids=encoding["input_ids"].flatten(),
       attention_mask=encoding["attention_mask"].flatten(),
-      labels=torch.FloatTensor(labels)
+      labels=torch.ShortTensor(labels)
     )
