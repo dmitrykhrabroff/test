@@ -33,6 +33,8 @@ reorder-python-imports = "^3.9.0"
 yesqa = "^1.4.0"
 pre-commit = "^3.3.2"
 pyupgrade = "^3.4.0"
+matplotlib = "^3.7.1"
+seaborn = "^0.12.2"
 
 
 [build-system]
