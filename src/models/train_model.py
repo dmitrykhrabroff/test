@@ -9,6 +9,8 @@ from pytorch_lightning.callbacks import LearningRateMonitor
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from pytorch_lightning.callbacks.model_checkpoint import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
+from pytorch_lightning.profilers import PyTorchProfiler
+from torch.profiler import profile, record_function, ProfilerActivity
 
 
 from src.models.config import ConfigModel
@@ -63,7 +65,8 @@ def train_model(dataset_path: str):
             ModelCheckpoint(
                 dirpath=f"models/{name_experiment}",
                 filename=model_name,
-                save_top_k=2,
+                save_top_k=1,
+                every_n_epochs = 1,
                 monitor="valid_loss",
                 mode="min",
             ),
@@ -77,16 +80,18 @@ def train_model(dataset_path: str):
             ),
         ]
         logger = TensorBoardLogger("lightning_logs", name="multilabel_classification")
-
+        profiler = PyTorchProfiler(
+            activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA],
+            profile_memory=True)
 
         trainer = pl.Trainer(
+            profiler=profiler,
             accelerator=device,
             max_epochs=epochs,
             callbacks=callbacks,
             logger = logger,
             enable_checkpointing=True,
-            fast_dev_run=True,
-)
+            fast_dev_run=False)
 
         trainer.fit(model, dm)
 

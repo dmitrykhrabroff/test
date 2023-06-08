@@ -1,26 +1,30 @@
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
-from transformers import BertModel, AdamW, get_linear_schedule_with_warmup
+from transformers import  AutoModel, AdamW, get_linear_schedule_with_warmup, AutoConfig
+
 from torchmetrics import AUROC
-from torchmetrics import AUROC
+import torch.nn.functional as F
 
 from src.models.config import ConfigModel
 from src.models.config import ConfigModel
 
-class TransformersTextClassifier(pl.LightningModule):
-  def __init__(self, model_name = 'bert-base-cased', lr_rate = 2e-5, 
-               n_training_steps = None, n_warmup_steps = None):
 class TransformersTextClassifier(pl.LightningModule):
   def __init__(self, model_name = 'bert-base-cased', lr_rate = 2e-5, 
                n_training_steps = None, n_warmup_steps = None):
     super().__init__()
     config = ConfigModel()
-    self.bert = BertModel.from_pretrained(model_name, return_dict=True)
-    self.classifier = nn.Linear(self.bert.config.hidden_size, config.n_classes)
+    # self.config = AutoConfig.from_pretrained(model_name)
+    self.bert = AutoModel.from_pretrained(model_name, return_dict=True)
+    self.classifier = nn.Sequential(nn.Linear(self.bert.config.hidden_size,   
+                                                self.bert.config.hidden_size), 
+                                    nn.Dropout(), nn.ReLU(),
+                                    nn.Linear(self.bert.config.hidden_size, config.n_classes))
+
     self.n_training_steps = n_training_steps
     self.n_warmup_steps = n_warmup_steps
-    self.criterion = config.loss_fn
+    self.criterion = nn.BCEWithLogitsLoss(reduce='mean')
+    self.dropout = nn.Dropout()
     self.lr_rate = lr_rate
     self.metrcis = AUROC(task = 'multilabel', num_labels = config.n_classes)
     self.label_names = config.label_names
@@ -29,11 +33,12 @@ class TransformersTextClassifier(pl.LightningModule):
 
   def forward(self, input_ids, attention_mask, labels=None):
     output = self.bert(input_ids, attention_mask=attention_mask)
-    output = self.classifier(output.pooler_output)
-    output = torch.sigmoid(output)
+    pooled_output = torch.mean(output.last_hidden_state, 1)
+    output = self.classifier(pooled_output)
+    # output = self.classifier(torch.mean(self.bert(input_ids, attention_mask=attention_mask).last_hidden_state, 1))
     loss = 0
     if labels is not None:
-        loss = self.criterion(output, labels)
+        loss = self.criterion(output, labels.type(torch.float))
     return loss, output
   
   def shared_step(self, batch, stage):
@@ -41,9 +46,12 @@ class TransformersTextClassifier(pl.LightningModule):
     attention_mask = batch["attention_mask"]
     labels = batch["labels"]
     loss, outputs = self(input_ids, attention_mask, labels)
+    # print(outputs.shape, labels.shape, 'outputs.shape, labels.shape')
     self.log(f"{stage}_loss", loss, prog_bar=True, logger=True)
     self.epoch_prediction[stage].append(outputs)
     self.epoch_labels[stage].append(labels)
+    # print(self.epoch_prediction[stage], f"self.epoch_prediction[{stage}]")
+    # print(self.epoch_labels[stage], f"self.epoch_labels[{stage}]")
     return loss
   
   def training_step(self, batch, batch_idx):
@@ -59,12 +67,10 @@ class TransformersTextClassifier(pl.LightningModule):
     return result
   
   def on_shared_epoch_end(self, stage):
-    labels = torch.stack(self.epoch_labels[stage]).type(torch.LongTensor)
-    print(labels, 'labels')
-    predictions = torch.stack(self.epoch_prediction[stage])
-    for i, name in enumerate(self.label_names):
-      class_roc_auc = self.metrcis(predictions[:, i], labels[:, i])
-      self.logger.experiment.add_scalar(f"{name}_roc_auc/{stage}", class_roc_auc, self.current_epoch)
+    labels = torch.vstack(self.epoch_labels[stage]).type(torch.LongTensor).to('cpu')
+    predictions = torch.vstack(self.epoch_prediction[stage]).to('cpu')
+    class_roc_auc = self.metrcis(predictions, labels)
+    self.logger.experiment.add_scalar(f"roc_auc/{stage}", class_roc_auc, self.current_epoch)
     self.epoch_labels[stage].clear()
     self.epoch_prediction[stage].clear()
 
@@ -75,11 +81,10 @@ class TransformersTextClassifier(pl.LightningModule):
   def on_validation_epoch_end(self):
     self.on_shared_epoch_end('valid')
 
-  def on_train_epoch_end(self):
-    self.on_shared_epoch_end('train')
+  def on_test_epoch_end(self):
+    self.on_shared_epoch_end('test')
 
   def configure_optimizers(self):
-    optimizer = AdamW(self.parameters(), lr=self.lr_rate)
     optimizer = AdamW(self.parameters(), lr=self.lr_rate)
     scheduler = get_linear_schedule_with_warmup(
       optimizer,
