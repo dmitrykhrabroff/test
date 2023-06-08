@@ -34,18 +34,28 @@ def _clean_data(full_df: pd.DataFrame):
     target_df = clean_df.groupby('text_id')[labels].sum().reset_index()
     clean_df = clean_df.loc[:, non_labels].merge(target_df, on='text_id')
     clean_df.drop_duplicates('text_id', inplace = True)
+    clean_df['num_labels'] = clean_df[labels].sum(1)
     return clean_df
-    # clean_df = pd.concat([clean_df, target_df], axis = 1)
-    # target_df = target_df.groupby('text_id').sum()
-    # duplicated_df = clean_df.loc[mask, :]
-    # duplicate_target = duplicated_df.groupby('text_id')[labels].sum()
-    # duplicated_df.drop_duplicates('text_id', inplace = True)
-    # duplicated_df = duplicated_df.drop(labels, axis =1)
-    # clean_df.loc[mask, labels] = clean_df.loc[mask, 'text_id'].map(duplicate_target)
-    # clean_df.drop_duplicates('text_id', inplace = True)
-    # clean_df = clean_df.loc[:, ['summary'] + labels]
-    # return clean_df
+   
+def _sample_sparse_row(df):
+    labels = [col for col in df.columns if 'encodded_label' in col]
+    min_value = df[labels].sum().min() #find minimum label
+    non_unique_num_labels = df.loc[df.num_labels != 1, :][labels].sum().to_dict()
+    unique_num_labels = df.loc[df.num_labels == 1, :][labels].sum().to_dict()
 
+    total = min_value // 0.02 #minimum 2% in distribution min label
+    non_unique_df = df.loc[df.num_labels > 1, :]
+    unique_df = df.loc[df.num_labels == 1, :]
+    for label in labels:
+        if non_unique_num_labels[label] > total * 0.05:
+            continue
+        else:
+            curr_df = unique_df.loc[unique_df[label] != 0, :]
+            n_sample = min(int(total * 0.05 - non_unique_num_labels[label]), 
+                        unique_num_labels[label]) 
+
+            non_unique_df = pd.concat([non_unique_df, curr_df.sample(n_sample)])
+    return non_unique_df
 
 
 @click.command()
@@ -54,6 +64,7 @@ def _clean_data(full_df: pd.DataFrame):
 def prepare_data(data_path: str, save_path: str):
     full_df = _parse_data(data_path)
     clean_df = _clean_data(full_df)
+    clean_df = _sample_sparse_row(clean_df)
     clean_df.to_csv(save_path, index= False)
 
 if __name__ == "__main__":
