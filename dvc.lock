@@ -8,35 +8,22 @@ stages:
       size: 2505414925
       nfiles: 21
     - path: src/data/prepare_data.py
-      md5: d804a054ee2b3a287435342df477c965
-      size: 2945
+      md5: 6930c61118bbd37bff02d72e0f28bcee
+      size: 4637
     outs:
     - path: data/interim/interim_df.csv
-      md5: 023a1ada82225279ff357da8e80e28cd
-      size: 455010594
-  clean_data:
-    cmd: python src/data/clean_data.py data/interim/interim_df.csv data/processed/new.csv
-    deps:
-    - path: data/interim/interim_df.csv
-      md5: e2f42b44b42bb945d2338256c8cf827c
-      size: 2514032208
-    - path: src/data/clean_data.py
-      md5: 04183f3d03750d29f23d077b3d4766f1
-      size: 1217
-    outs:
-    - path: data/processed/new.csv
-      md5: 32311b005f68c8b3fb556f2d0868f95a
-      size: 1604320629
+      md5: 5bc96bde37ffd06e4db253228bf038e2
+      size: 454654333
   make_dataset:
     cmd: python src/data/make_dataset.py data/interim/interim_df.csv data/processed/processed_df.csv
     deps:
     - path: data/interim/interim_df.csv
-      md5: 023a1ada82225279ff357da8e80e28cd
-      size: 455010594
+      md5: 5bc96bde37ffd06e4db253228bf038e2
+      size: 454654333
     - path: src/data/make_dataset.py
-      md5: a99e57fb330058715597f1cfb5029b65
-      size: 1606
+      md5: 629bd2c73db857b01dfe63615a8a9751
+      size: 1289
     outs:
     - path: data/processed/processed_df.csv
-      md5: a8adf585021d91bf544c51578f2c4d08
-      size: 199846125
+      md5: c5c93f7aead06078299e6e764cfb93fa
+      size: 199734742
