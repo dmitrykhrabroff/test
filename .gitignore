@@ -91,3 +91,4 @@ target/
 .mypy_cache/
 notebooks/clean_data.csv
 lightning_logs
+/models
