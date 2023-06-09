@@ -1,9 +1,70 @@
-kaspersky_test
+# Тестовое задание.
+## Создание мультиклассового классификатора (один текст может иметь разные метки)
 ==============================
 
-A short description of the project.
+ ### Описание задачи
+* Имеется 20 csv файлов, каждый описывает некоторую технологию (название файла – название технологии). Технология описывается новостями за последние 3 года.
+* Надо создать классификатор, который будет предсказывать по входному тексту, к какой технологии относится новость.
+* Классификатор должен быть мультиклассовым – т.е. один текст может иметь метки разных технологий.
+* Необходимые метрики соискатель должен выбрать сам, обосновать их выбор и предоставить значения метрик для обученного классификатора.
+* Выбор фреймворка и модели остается за соискателем.
+* Будет плюсом если соискатель проверит разные модели, приведет значения метрик и обоснует выбор одной из моделей для потенциального запуска в продакшн.
+____________________
+## 1. Настройка среды окружения и установка зависимостей.
+ В качестве менеджера зависимостей в проекте используется пакет [poetry](https://python-poetry.org/).
+ Для установки зависимостей и активации виртуального окружения введите команды
+ ```
+ pip install poetry
+ poetry install
+ poetry shell
+ ```
+## 2. Управление данными.
+ Исходные данные размещены на S3 хранилище в Яндекс облаке.  В качестве инструмента по управлению данными используется dvc (для работы dvc должен быть предварительно активирован git). 
+ Для доступа к s3 хранилищу необходимо заполнить [config_example](https://github.com/dmitrykhrabroff/test/blob/main/.dvc/config_example) (криды предоставляются по запросу) и выполнить следующие команды.
+ ```
+ git init
+ dvc init
+ dvc pull
+ ```
+ ## 3. Предобработка данных.
+ Реализована возможность очистки данных с помощью инструментов командной строки.
+ Функция prepare_data удаляет дубликаты в наших данных и приводит целевые признаки к OneHotEncoder вектору,
+ а так же выполняет DownSampling данных
+  ```
+  python src/data/prepare_data.py data/raw data/interim/interim_df.csv
+ ```
+ Функция make_dataset выполняет финальную фильтрацию данных, обрезает текст до заданного кол-ва токенов в зависимости от модели.  
+  ```
+ python src/data/make_dataset.py data/interim/interim_df.csv data/processed/processed_df.csv
+ ```
+ Более подробно процедура обработки данныз показана в [ноутбуке](https://github.com/dmitrykhrabroff/test/blob/main/notebooks/EDA.ipynb)
+ 
+## 4. Обучение модели.
+ Архитектура проекта предусматривает возможность дообучения различных моделей из библиотеки [transformers](https://huggingface.co/docs/transformers/index).
+ Для инициализации моедлей используйте
+```
+from transformers import AutoModel # For BERTs
+from transformers import AutoModeForSequenceClassification # For models fine-tuned on MNLI
+from transformers import AutoTokenizer
 
-Project Organization
+tokenizer = AutoTokenizer.from_pretrained(model_name) 
+model = AutoModel.from_pretrained(model_name) 
+```
+Обучение модели доступно из командной строки  
+  ```
+python src/models/train_model.py data/processed/processed_df.csv
+ ```
+ 
+## 5. Оценка результатов модели
+В ходе исследования были протестированы следующие модели:
+* distil-bert-uncased
+* "prajjwal1/bert-tiny"
+* "prajjwal1/bert-mini"
+* "prajjwal1/bert-small"
+
+Результаты оценки моделей представлены в [ноутбуке](https://github.com/dmitrykhrabroff/test/blob/main/notebooks/EDA.ipynb)
+
+## 6. Структура проекта
 ------------
 
     ├── LICENSE
