@@ -12,8 +12,8 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from pytorch_lightning.profilers import PyTorchProfiler
 from torch.profiler import ProfilerActivity
 
-from src.models.config import ConfigModel
 from src.models.bert_models import TransformersTextClassifier
+from src.models.config import ConfigModel
 from src.models.pl_datamodule import MyDataModule
 
 

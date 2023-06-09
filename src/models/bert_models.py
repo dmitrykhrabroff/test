@@ -53,12 +53,12 @@ class TransformersTextClassifier(pl.LightningModule):
             loss = self.criterion(output, labels.type(torch.float))
         return loss, output
 
-    def shared_step(self, batch, stage):    
+    def shared_step(self, batch, stage):
         input_ids = batch["input_ids"]
         attention_mask = batch["attention_mask"]
         labels = batch["labels"]
         loss, outputs = self(input_ids, attention_mask, labels)
-        if stage =='train':
+        if stage == "train":
             opt = self.optimizers()
             opt.zero_grad()
             self.manual_backward(loss)
@@ -89,7 +89,6 @@ class TransformersTextClassifier(pl.LightningModule):
         )
         self.epoch_labels[stage].clear()
         self.epoch_prediction[stage].clear()
-
 
     def on_train_epoch_end(self):
         self.on_shared_epoch_end("train")

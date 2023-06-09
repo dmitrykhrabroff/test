@@ -16,5 +16,5 @@ class ConfigModel:
         self.grid = {
             "learning_rate": [1e-5],
             "batch_size": [16],
-            "warmup_partition": [5]
+            "warmup_partition": [5],
         }
