@@ -58,11 +58,11 @@ python src/models/train_model.py data/processed/processed_df.csv
 ## 5. Оценка результатов модели
 В ходе исследования были протестированы следующие модели:
 * distil-bert-uncased
-* "prajjwal1/bert-tiny"
+* "smallbenchnlp/bert-small"
 * "prajjwal1/bert-mini"
 * "prajjwal1/bert-small"
 
-Результаты оценки моделей представлены в [ноутбуке](https://github.com/dmitrykhrabroff/test/blob/main/notebooks/EDA.ipynb)
+Результаты оценки моделей представлены в [ноутбуке](https://github.com/dmitrykhrabroff/test/blob/main/notebooks/evaluate_models.ipynb)
 
 ## 6. Структура проекта
 ------------
