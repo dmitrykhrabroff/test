@@ -21,6 +21,7 @@ class MyDataModule(pl.LightningDataModule):
         super().__init__()
         self.data_path = processed_df_path
         processed_df = pd.read_csv(processed_df_path)
+        print(processed_df.shape, 'processed_df.shape')
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.dset = MultiLabelDataset(processed_df, tokenizer)
         self.config = ConfigModel()
@@ -47,6 +48,7 @@ class MyDataModule(pl.LightningDataModule):
         if stage == "fit":
             self.train_set = Subset(self.dset, self.ind_train)
             self.val_set = Subset(self.dset, self.ind_val)
+        elif stage == "test":
             self.test_set = Subset(self.dset, self.ind_test)
 
     def train_dataloader(self):

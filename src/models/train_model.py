@@ -13,7 +13,7 @@ from pytorch_lightning.profilers import PyTorchProfiler
 from torch.profiler import ProfilerActivity
 
 from src.models.config import ConfigModel
-from src.models.model import TransformersTextClassifier
+from src.models.bert_models import TransformersTextClassifier
 from src.models.pl_datamodule import MyDataModule
 
 

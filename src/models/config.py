@@ -12,9 +12,9 @@ class ConfigModel:
         with open("data/processed/processed_df.csv") as f:
             self.label_names = f.readline().strip().split(",")[2:]
         self.n_classes = 20
-        self.model_name = "bert-base-cased"
+        self.model_name = "prajjwal1/bert-mini"
         self.grid = {
-            "learning_rate": [1e-5, 1e-6],
-            "batch_size": [8],
-            "warmup_partition": [5, 10]
+            "learning_rate": [1e-5],
+            "batch_size": [16],
+            "warmup_partition": [5]
         }
