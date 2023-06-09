@@ -2,7 +2,7 @@
     remote = storage
 
 ['remote "storage"']
-    url = s3://testingdata
-    endpointurl = https://storage.yandexcloud.net/
-    access_key_id = YCAJENn-v45pRartkCvXlisWI
-    secret_access_key = YCMxMbTGpIHctoVeHnIbBAMyQKrDe2V6h1Zqh6II
+    url = 
+    endpointurl = 
+    access_key_id = 
+    secret_access_key = 
