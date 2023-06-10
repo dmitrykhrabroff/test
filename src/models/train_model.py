@@ -22,18 +22,20 @@ load_dotenv()
 remote_server_uri = os.getenv("MLFLOW_TRACKING_URI")
 
 
-def train_model(dataset_path: str):
+def train_model(dataset_path: str, model_name = None):
     """Тренировка нашей модели с перебором гиперпараметров
 
     Args:
         dataset_path (str): путь к датасету
+        name_model (str): имя тестируемой модели
     """
 
     config = ConfigModel()
     epochs = config.epochs
     grid = config.grid  # гиперпараметры для обучения модели
     device = config.device
-    model_name = config.model_name
+    if not model_name:
+        model_name = config.model_name
     for values in itertools.product(*grid.values()):  # перебор гиперпараметров
         lr_rate, batch_size, warmup_partition = values
 
@@ -93,8 +95,9 @@ def train_model(dataset_path: str):
 
 @click.command()
 @click.argument("dataset_path", type=click.Path(exists=True))
-def main(dataset_path):
-    train_model(dataset_path)
+@click.option("--model_name", required=False, type=click.STRING)
+def main(dataset_path: str, model_name):
+    train_model(dataset_path, model_name)
 
 
 if __name__ == "__main__":
