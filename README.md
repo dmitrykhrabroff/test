@@ -33,15 +33,15 @@ ____________________
   ```
   python src/data/prepare_data.py data/raw data/interim/interim_df.csv
  ```
- Функция make_dataset выполняет финальную фильтрацию данных, обрезает текст до заданного кол-ва токенов в зависимости от модели.  
+ Функция make_dataset выполняет финальную фильтрацию данных, обрезает текст до заданного кол-ва токенов (--num_tokens по умолчанию 512) в зависимости от модели.  
   ```
- python src/data/make_dataset.py data/interim/interim_df.csv data/processed/processed_df.csv
+ python src/data/make_dataset.py --num_tokens 512 data/interim/interim_df.csv data/processed/processed_df.csv
  ```
  Более подробно процедура обработки данныз показана в [ноутбуке](https://github.com/dmitrykhrabroff/test/blob/main/notebooks/EDA.ipynb)
  
 ## 4. Обучение модели.
  Архитектура проекта предусматривает возможность дообучения различных моделей из библиотеки [transformers](https://huggingface.co/docs/transformers/index).
- Для инициализации моедлей используйте
+ Для инициализации моделей используйте
 ```
 from transformers import AutoModel # For BERTs
 from transformers import AutoModeForSequenceClassification # For models fine-tuned on MNLI
@@ -50,12 +50,22 @@ from transformers import AutoTokenizer
 tokenizer = AutoTokenizer.from_pretrained(model_name) 
 model = AutoModel.from_pretrained(model_name) 
 ```
-Обучение модели доступно из командной строки  
+Обучение модели доступно из командной строки, имя модели можно задать с помощью опции --model-name,
+либо по умолчанию подгружается ихз конфигурационного файла.
   ```
-python src/models/train_model.py data/processed/processed_df.csv
+python src/models/train_model.py --model_name some_modelname data/processed/processed_df.csv
  ```
  
-## 5. Оценка результатов модели
+ 
+## 5. Конвеер обучения
+Конвеер обучения реализован с помощью dvc workflow менеджера. Настройка конвеера в файле [dvc.yaml](https://github.com/dmitrykhrabroff/test/blob/main/dvc.yaml).
+
+Для запуска введите команду:
+```
+dvc repro
+ ```
+
+## 6. Оценка результатов модели
 В ходе исследования были протестированы следующие модели:
 * distil-bert-uncased
 * "smallbenchnlp/bert-small"
@@ -64,7 +74,7 @@ python src/models/train_model.py data/processed/processed_df.csv
 
 Результаты оценки моделей представлены в [ноутбуке](https://github.com/dmitrykhrabroff/test/blob/main/notebooks/evaluate_models.ipynb)
 
-## 6. Структура проекта
+## 7. Структура проекта
 ------------
 
     ├── LICENSE
